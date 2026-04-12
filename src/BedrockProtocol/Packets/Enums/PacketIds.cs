@@ -1,0 +1,39 @@
+namespace BedrockProtocol.Packets.Enums
+{
+    public enum PacketIds : uint
+    {
+        Login = 0x01,
+        PlayStatus = 0x02,
+        ServerToClientHandshake = 0x03,
+        ClientToServerHandshake = 0x04,
+        Disconnect = 0x05,
+        ResourcePacksInfo = 0x06,
+        ResourcePackStack = 0x07,
+        ResourcePackClientResponse = 0x08,
+        Text = 0x09,
+        SetTime = 0x0a,
+        StartGame = 0x0b,
+        AddPlayer = 0x0c,
+        AddMob = 0x0d,
+        RemoveEntity = 0x0e,
+        UpdateBlock = 0x15,
+        LevelSoundEvent = 0x18,
+        MoveEntityAbsolute = 0x12,
+        MovePlayer = 0x13,
+        SetEntityData = 0x27,
+        UpdateAttributes = 0x1d,
+        Interact = 0x21,
+        ContainerOpen = 0x2e,
+        ContainerClose = 0x2f,
+        InventoryContent = 0x31,
+        InventorySlot = 0x32,
+        LevelChunk = 0x3a,
+        PlayerList = 0x3f,
+        SetLocalPlayerAsInitialized = 0x71,
+        BiomeDefinitionList = 0x7a,
+        PlayerAuthInput = 0x90,
+        CreativeContent = 0x91,
+        NetworkSettings = 0x8f,
+        RequestNetworkSettings = 0xc1
+    }
+}
