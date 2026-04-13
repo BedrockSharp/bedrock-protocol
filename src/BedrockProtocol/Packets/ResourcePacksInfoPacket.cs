@@ -1,4 +1,7 @@
 using BedrockProtocol.Utils;
+using BedrockProtocol.Packets.Types;
+using System;
+using System.Collections.Generic;
 
 namespace BedrockProtocol.Packets
 {
@@ -6,26 +9,50 @@ namespace BedrockProtocol.Packets
     {
         public override uint PacketId => (uint)PacketIds.ResourcePacksInfo;
 
+        public List<ResourcePackInfoEntry> ResourcePackEntries { get; set; } = new();
         public bool MustAccept { get; set; }
+        public bool HasAddons { get; set; }
         public bool HasScripts { get; set; }
-        public bool ForceServerPacks { get; set; }
+        public Guid WorldTemplateId { get; set; }
+        public string WorldTemplateVersion { get; set; } = string.Empty;
+        public bool ForceDisableVibrantVisuals { get; set; }
 
         public override void Encode(BinaryStream stream)
         {
+            stream.WriteUnsignedVarInt((uint)ResourcePackEntries.Count);
+
+            foreach (var entry in ResourcePackEntries)
+            {
+                entry.Encode(stream);
+            }
+
             stream.WriteBool(MustAccept);
+            stream.WriteBool(HasAddons);
             stream.WriteBool(HasScripts);
-            stream.WriteBool(ForceServerPacks);
-            stream.WriteShort(0); 
-            stream.WriteShort(0); 
+            stream.WriteString(WorldTemplateId.ToString());
+            stream.WriteString(WorldTemplateVersion);
+            stream.WriteBool(ForceDisableVibrantVisuals);
         }
 
         public override void Decode(BinaryStream stream)
         {
+            uint count = stream.ReadUnsignedVarInt();
+
+            ResourcePackEntries.Clear();
+
+            for (int i = 0; i < count; i++)
+            {
+                var entry = new ResourcePackInfoEntry();
+                entry.Decode(stream);
+                ResourcePackEntries.Add(entry);
+            }
+
             MustAccept = stream.ReadBool();
+            HasAddons = stream.ReadBool();
             HasScripts = stream.ReadBool();
-            ForceServerPacks = stream.ReadBool();
-            stream.ReadShort(); 
-            stream.ReadShort(); 
+            WorldTemplateId = Guid.Parse(stream.ReadString());
+            WorldTemplateVersion = stream.ReadString();
+            ForceDisableVibrantVisuals = stream.ReadBool();
         }
     }
 }
