@@ -1,7 +1,6 @@
 using System;
 using System.IO;
 using System.Text;
-using BedrockProtocol.Packets.Enums;
 using BedrockProtocol.Packets.Types;
 using BedrockProtocol.Utils;
 

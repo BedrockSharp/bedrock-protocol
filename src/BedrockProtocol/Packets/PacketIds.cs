@@ -1,4 +1,4 @@
-namespace BedrockProtocol.Packets.Enums
+namespace BedrockProtocol.Packets
 {
     public enum PacketIds : uint
     {

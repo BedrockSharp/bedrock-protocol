@@ -1,4 +1,3 @@
-using BedrockProtocol.Packets.Enums;
 using BedrockProtocol.Packets.Types;
 using BedrockProtocol.Utils;
 
