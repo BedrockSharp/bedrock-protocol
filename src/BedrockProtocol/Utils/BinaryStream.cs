@@ -49,11 +49,20 @@ namespace BedrockProtocol.Utils
         public short ReadShort() => _reader.ReadInt16();
         public void WriteShort(short value) => _writer.Write(value);
 
+        public ushort ReadUnsignedShort() => _reader.ReadUInt16();
+        public void WriteUnsignedShort(ushort value) => _writer.Write(value);
+
         public int ReadInt() => _reader.ReadInt32();
         public void WriteInt(int value) => _writer.Write(value);
 
+        public uint ReadUnsignedInt() => _reader.ReadUInt32();
+        public void WriteUnsignedInt(uint value) => _writer.Write(value);
+
         public long ReadLong() => _reader.ReadInt64();
         public void WriteLong(long value) => _writer.Write(value);
+
+        public ulong ReadUnsignedLong() => _reader.ReadUInt64();
+        public void WriteUnsignedLong(ulong value) => _writer.Write(value);
 
         public float ReadFloat() => _reader.ReadSingle();
         public void WriteFloat(float value) => _writer.Write(value);
