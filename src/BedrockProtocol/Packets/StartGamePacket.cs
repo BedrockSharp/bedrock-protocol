@@ -1,5 +1,9 @@
-using BedrockProtocol.Packets.Types;
 using BedrockProtocol.Utils;
+using BedrockProtocol.Packets.Types;
+using BedrockProtocol.Types;
+using System;
+using System.Collections.Generic;
+using System.Numerics;
 
 namespace BedrockProtocol.Packets
 {
@@ -7,90 +11,162 @@ namespace BedrockProtocol.Packets
     {
         public override uint PacketId => (uint)PacketIds.StartGame;
 
-        public long EntityId { get; set; }
-        public ulong RuntimeEntityId { get; set; }
+        public long ActorUniqueId { get; set; }
+        public ulong ActorRuntimeId { get; set; }
         public int PlayerGamemode { get; set; }
-        public float X { get; set; }
-        public float Y { get; set; }
-        public float Z { get; set; }
+
+        public float PlayerX { get; set; }
+        public float PlayerY { get; set; }
+        public float PlayerZ { get; set; }
+
         public float Pitch { get; set; }
         public float Yaw { get; set; }
-        public LevelSettings LevelSettings { get; set; } = new LevelSettings();
+
+        public CacheableNbt PlayerActorProperties { get; set; } = null!;
+        public LevelSettings LevelSettings { get; set; } = null!;
+
         public string LevelId { get; set; } = string.Empty;
         public string WorldName { get; set; } = string.Empty;
         public string PremiumWorldTemplateId { get; set; } = string.Empty;
         public bool IsTrial { get; set; }
-        public int MovementType { get; set; }
-        public int RewindHistorySize { get; set; }
-        public bool ServerAuthoritativeBlockBreaking { get; set; }
-        public long CurrentTick { get; set; }
+
+        public PlayerMovementSettings PlayerMovementSettings { get; set; } = null!;
+
+        public ulong CurrentTick { get; set; }
         public int EnchantmentSeed { get; set; }
-        public string BlockProperties { get; set; } = string.Empty;
-        public string ItemStates { get; set; } = string.Empty;
+
+        public List<BlockPaletteEntry> BlockPalette { get; set; } = new();
+
         public string MultiplayerCorrelationId { get; set; } = string.Empty;
-        
-        public byte[] NbtPayload { get; set; } = new byte[0];
+        public bool EnableNewInventorySystem { get; set; }
+
+        public string ServerSoftwareVersion { get; set; } = string.Empty;
+
+        public ulong BlockPaletteChecksum { get; set; }
+
+        public Guid WorldTemplateId { get; set; }
+
+        public bool EnableClientSideChunkGeneration { get; set; }
+        public bool BlockNetworkIdsAreHashes { get; set; }
+
+        public NetworkPermissions NetworkPermissions { get; set; } = null!;
+        public ServerJoinInformation ServerJoinInformation { get; set; } = null!;
+        public ServerTelemetryData ServerTelemetryData { get; set; } = null!;
 
         public override void Encode(BinaryStream stream)
         {
-            stream.WriteVarLong(EntityId);
-            stream.WriteUnsignedVarLong(RuntimeEntityId);
+            stream.WriteActorUniqueId(ActorUniqueId);
+            stream.WriteActorRuntimeId(ActorRuntimeId);
             stream.WriteVarInt(PlayerGamemode);
-            stream.WriteFloat(X);
-            stream.WriteFloat(Y);
-            stream.WriteFloat(Z);
+
+            stream.WriteFloat(PlayerX);
+            stream.WriteFloat(PlayerY);
+            stream.WriteFloat(PlayerZ);
+
             stream.WriteFloat(Pitch);
             stream.WriteFloat(Yaw);
+
             LevelSettings.Encode(stream);
-            stream.WriteUnsignedVarInt(0); 
-            stream.WriteUnsignedVarInt(0); 
-            stream.WriteBool(false); 
+
             stream.WriteString(LevelId);
             stream.WriteString(WorldName);
             stream.WriteString(PremiumWorldTemplateId);
             stream.WriteBool(IsTrial);
-            stream.WriteVarInt(MovementType);
-            stream.WriteVarInt(RewindHistorySize);
-            stream.WriteBool(ServerAuthoritativeBlockBreaking);
-            stream.WriteVarLong(CurrentTick);
+
+            PlayerMovementSettings.Encode(stream);
+
+            stream.WriteUnsignedLong(CurrentTick);
+
             stream.WriteVarInt(EnchantmentSeed);
-            stream.WriteUnsignedVarInt((uint)NbtPayload.Length);
-            stream.WriteBytes(NbtPayload);
+
+            stream.WriteUnsignedVarInt((uint)BlockPalette.Count);
+
+            foreach (var entry in BlockPalette)
+            {
+                stream.WriteString(entry.Name);
+                stream.WriteByteArray(entry.States.GetEncodedNbt());
+            }
+
             stream.WriteString(MultiplayerCorrelationId);
-            stream.WriteBool(false);
-            stream.WriteString(string.Empty);
-            stream.WriteString(string.Empty);
+            stream.WriteBool(EnableNewInventorySystem);
+            stream.WriteString(ServerSoftwareVersion);
+
+            stream.WriteByteArray(PlayerActorProperties.GetEncodedNbt());
+
+            stream.WriteUnsignedLong(BlockPaletteChecksum);
+
+            stream.WriteUuid(WorldTemplateId);
+
+            stream.WriteBool(EnableClientSideChunkGeneration);
+            stream.WriteBool(BlockNetworkIdsAreHashes);
+
+            NetworkPermissions.Encode(stream);
+
+            stream.WriteOptional(ServerJoinInformation, (s, v) => v.Encode(s));
+
+            ServerTelemetryData.Encode(stream);
         }
 
         public override void Decode(BinaryStream stream)
         {
-            EntityId = stream.ReadVarLong();
-            RuntimeEntityId = stream.ReadUnsignedVarLong();
+            ActorUniqueId = stream.ReadActorUniqueId();
+            ActorRuntimeId = stream.ReadActorRuntimeId();
             PlayerGamemode = stream.ReadVarInt();
-            X = stream.ReadFloat();
-            Y = stream.ReadFloat();
-            Z = stream.ReadFloat();
+
+            PlayerX = stream.ReadFloat();
+            PlayerY = stream.ReadFloat();
+            PlayerZ = stream.ReadFloat();
+
             Pitch = stream.ReadFloat();
             Yaw = stream.ReadFloat();
+
+            LevelSettings = new LevelSettings();
             LevelSettings.Decode(stream);
-            stream.ReadUnsignedVarInt();
-            stream.ReadUnsignedVarInt();
-            stream.ReadBool();
+
             LevelId = stream.ReadString();
             WorldName = stream.ReadString();
             PremiumWorldTemplateId = stream.ReadString();
             IsTrial = stream.ReadBool();
-            MovementType = stream.ReadVarInt();
-            RewindHistorySize = stream.ReadVarInt();
-            ServerAuthoritativeBlockBreaking = stream.ReadBool();
-            CurrentTick = stream.ReadVarLong();
+
+            PlayerMovementSettings = new PlayerMovementSettings();
+            PlayerMovementSettings.Decode(stream);
+
+            CurrentTick = stream.ReadUnsignedLong();
+
             EnchantmentSeed = stream.ReadVarInt();
-            uint nbtLen = stream.ReadUnsignedVarInt();
-            NbtPayload = stream.ReadBytes((int)nbtLen);
+
+            uint count = stream.ReadUnsignedVarInt();
+
+            BlockPalette.Clear();
+
+            for (int i = 0; i < count; i++)
+            {
+                var name = stream.ReadString();
+                var nbt = stream.ReadByteArray();
+
+                BlockPalette.Add(new BlockPaletteEntry(name, new CacheableNbt(nbt)));
+            }
+
             MultiplayerCorrelationId = stream.ReadString();
-            stream.ReadBool();
-            stream.ReadString();
-            stream.ReadString();
+            EnableNewInventorySystem = stream.ReadBool();
+            ServerSoftwareVersion = stream.ReadString();
+
+            PlayerActorProperties = new CacheableNbt(stream.ReadByteArray());
+
+            BlockPaletteChecksum = stream.ReadUnsignedLong();
+
+            WorldTemplateId = stream.ReadUuid();
+
+            EnableClientSideChunkGeneration = stream.ReadBool();
+            BlockNetworkIdsAreHashes = stream.ReadBool();
+
+            NetworkPermissions = new NetworkPermissions();
+            NetworkPermissions.Decode(stream);
+
+            ServerJoinInformation = stream.ReadOptional<ServerJoinInformation>();
+
+            ServerTelemetryData = new ServerTelemetryData();
+            ServerTelemetryData.Decode(stream);
         }
     }
 }

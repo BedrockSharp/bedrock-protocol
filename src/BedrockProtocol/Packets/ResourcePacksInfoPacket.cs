@@ -19,25 +19,30 @@ namespace BedrockProtocol.Packets
 
         public override void Encode(BinaryStream stream)
         {
-            stream.WriteUnsignedVarInt((uint)ResourcePackEntries.Count);
+            stream.WriteBool(MustAccept);
+            stream.WriteBool(HasAddons);
+            stream.WriteBool(HasScripts);
+            stream.WriteBool(ForceDisableVibrantVisuals);
+            stream.WriteUuid(WorldTemplateId);
+            stream.WriteString(WorldTemplateVersion);
 
+            stream.WriteUnsignedShort((ushort)ResourcePackEntries.Count);
             foreach (var entry in ResourcePackEntries)
             {
                 entry.Encode(stream);
             }
-
-            stream.WriteBool(MustAccept);
-            stream.WriteBool(HasAddons);
-            stream.WriteBool(HasScripts);
-            stream.WriteString(WorldTemplateId.ToString());
-            stream.WriteString(WorldTemplateVersion);
-            stream.WriteBool(ForceDisableVibrantVisuals);
         }
 
         public override void Decode(BinaryStream stream)
         {
-            uint count = stream.ReadUnsignedVarInt();
+            MustAccept = stream.ReadBool();
+            HasAddons = stream.ReadBool();
+            HasScripts = stream.ReadBool();
+            ForceDisableVibrantVisuals = stream.ReadBool();
+            WorldTemplateId = stream.ReadUuid();
+            WorldTemplateVersion = stream.ReadString();
 
+            ushort count = stream.ReadUnsignedShort();
             ResourcePackEntries.Clear();
 
             for (int i = 0; i < count; i++)
@@ -46,13 +51,6 @@ namespace BedrockProtocol.Packets
                 entry.Decode(stream);
                 ResourcePackEntries.Add(entry);
             }
-
-            MustAccept = stream.ReadBool();
-            HasAddons = stream.ReadBool();
-            HasScripts = stream.ReadBool();
-            WorldTemplateId = Guid.Parse(stream.ReadString());
-            WorldTemplateVersion = stream.ReadString();
-            ForceDisableVibrantVisuals = stream.ReadBool();
         }
     }
 }

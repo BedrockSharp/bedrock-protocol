@@ -110,5 +110,43 @@ namespace BedrockProtocol.Utils
             byte[] bytes = _reader.ReadBytes(16);
             return new System.Guid(bytes);
         }
+
+        public void WriteOptional<T>(T value, Action<BinaryStream, T> writer) {
+            WriteBool(value != null);
+
+            if(value != null) {
+                writer(this, value);
+            }
+        }
+        
+        public T ReadOptional<T>() where T : new() {
+            bool exists = ReadBool();
+
+            if(!exists) return default;
+
+            T obj = new();
+
+            ((dynamic) obj).Decode(this);
+
+            return obj;
+        }
+
+        public long ReadActorUniqueId() => ReadVarLong();
+        public void WriteActorUniqueId(long value) => WriteVarLong(value);
+
+        public ulong ReadActorRuntimeId() => ReadUnsignedVarLong();
+        public void WriteActorRuntimeId(ulong value) => WriteUnsignedVarLong(value);
+
+        public byte[] ReadByteArray()
+        {
+            uint length = ReadUnsignedVarInt();
+            return ReadBytes((int)length);
+        }
+
+        public void WriteByteArray(byte[] data)
+        {
+            WriteUnsignedVarInt((uint)data.Length);
+            WriteBytes(data);
+        }
     }
 }
