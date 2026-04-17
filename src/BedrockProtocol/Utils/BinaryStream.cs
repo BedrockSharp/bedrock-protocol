@@ -1,6 +1,10 @@
+using BedrockProtocol.Types;
+using BedrockProtocol.Packets.Types;
+using Nbt;
+using System;
 using System.IO;
 using System.Text;
-using BedrockProtocol.Types;
+using System.Collections.Generic;
 
 namespace BedrockProtocol.Utils
 {
@@ -58,6 +62,20 @@ namespace BedrockProtocol.Utils
         public uint ReadUnsignedInt() => _reader.ReadUInt32();
         public void WriteUnsignedInt(uint value) => _writer.Write(value);
 
+        public int ReadBigEndianInt()
+        {
+            byte[] bytes = _reader.ReadBytes(4);
+            if (BitConverter.IsLittleEndian) Array.Reverse(bytes);
+            return BitConverter.ToInt32(bytes, 0);
+        }
+
+        public void WriteBigEndianInt(int value)
+        {
+            byte[] bytes = BitConverter.GetBytes(value);
+            if (BitConverter.IsLittleEndian) Array.Reverse(bytes);
+            _writer.Write(bytes);
+        }
+
         public long ReadLong() => _reader.ReadInt64();
         public void WriteLong(long value) => _writer.Write(value);
 
@@ -111,23 +129,37 @@ namespace BedrockProtocol.Utils
             return new System.Guid(bytes);
         }
 
-        public void WriteOptional<T>(T value, Action<BinaryStream, T> writer) {
-            WriteBool(value != null);
+        public void WriteOptional<T>(T? value, Action<BinaryStream, T> writer) where T : struct {
+            WriteBool(value.HasValue);
+            if(value.HasValue) {
+                writer(this, value.Value);
+            }
+        }
 
+        public void WriteOptional<T>(T value, Action<BinaryStream, T> writer) where T : class {
+            WriteBool(value != null);
             if(value != null) {
                 writer(this, value);
             }
         }
         
-        public T ReadOptional<T>() where T : new() {
+        public T? ReadOptional<T>(Func<BinaryStream, T> reader) where T : struct {
             bool exists = ReadBool();
+            if(!exists) return null;
+            return reader(this);
+        }
 
-            if(!exists) return default;
+        public T? ReadOptionalClass<T>(Func<BinaryStream, T> reader) where T : class {
+            bool exists = ReadBool();
+            if(!exists) return null;
+            return reader(this);
+        }
 
+        public T? ReadOptional<T>() where T : class, new() {
+            bool exists = ReadBool();
+            if(!exists) return null;
             T obj = new();
-
             ((dynamic) obj).Decode(this);
-
             return obj;
         }
 
@@ -147,6 +179,62 @@ namespace BedrockProtocol.Utils
         {
             WriteUnsignedVarInt((uint)data.Length);
             WriteBytes(data);
+        }
+
+        public void WriteVector3(float x, float y, float z)
+        {
+            WriteFloat(x);
+            WriteFloat(y);
+            WriteFloat(z);
+        }
+
+        public void WriteBlockVector3(int x, int y, int z)
+        {
+            WriteVarInt(x);
+            WriteVarInt(y);
+            WriteVarInt(z);
+        }
+
+        public void WriteNbt(CompoundTag tag)
+        {
+            var nbtWriter = new NbtBinaryWriter(_memoryStream, false); 
+            tag.WriteTag(nbtWriter);
+        }
+
+        public void WriteNetworkNbt(CompoundTag tag)
+        {
+            var nbtWriter = new NbtBinaryWriter(_memoryStream, false);
+            tag.WriteNetwork(nbtWriter);
+        }
+
+        public void WriteExperiments(List<ExperimentEntry> experiments)
+        {
+            WriteInt((int)experiments.Count);
+            foreach (var experiment in experiments)
+            {
+                WriteString(experiment.Name);
+                WriteBool(experiment.Enabled);
+            }
+        }
+
+        public void WriteArray<T>(ICollection<T> collection, Action<T> elementWriter)
+        {
+            WriteUnsignedVarInt((uint)collection.Count);
+            foreach (var item in collection)
+            {
+                elementWriter(item);
+            }
+        }
+
+        public List<T> ReadArray<T>(Func<T> elementReader)
+        {
+            uint length = ReadUnsignedVarInt();
+            var list = new List<T>((int)length);
+            for (int i = 0; i < length; i++)
+            {
+                list.Add(elementReader());
+            }
+            return list;
         }
     }
 }

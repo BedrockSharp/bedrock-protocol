@@ -11,12 +11,12 @@ namespace BedrockProtocol.Packets
 
         public override void Encode(BinaryStream stream)
         {
-            stream.WriteInt((int)Status);
+            stream.WriteBigEndianInt((int)Status);
         }
 
         public override void Decode(BinaryStream stream)
         {
-            Status = (PlayStatus)stream.ReadInt();
+            Status = (PlayStatus)stream.ReadBigEndianInt();
         }
     }
 }

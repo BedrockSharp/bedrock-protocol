@@ -34,6 +34,7 @@ namespace BedrockProtocol.Packets
         PlayerAuthInput = 0x90,
         CreativeContent = 0x91,
         NetworkSettings = 0x8f,
-        RequestNetworkSettings = 0xc1
+        RequestNetworkSettings = 0xc1,
+        VoxelShapes = 0x151
     }
 }
