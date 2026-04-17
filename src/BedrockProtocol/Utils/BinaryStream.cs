@@ -209,7 +209,7 @@ namespace BedrockProtocol.Utils
 
         public void WriteExperiments(List<ExperimentEntry> experiments)
         {
-            WriteInt((int)experiments.Count);
+            WriteIntLE(experiments.Count);
             foreach (var experiment in experiments)
             {
                 WriteString(experiment.Name);
@@ -235,6 +235,42 @@ namespace BedrockProtocol.Utils
                 list.Add(elementReader());
             }
             return list;
+        }
+
+        public void WriteIntLE(int value)
+        {
+            byte[] bytes = BitConverter.GetBytes(value);
+            _writer.Write(bytes);
+        }
+
+        public int ReadIntLE()
+        {
+            byte[] bytes = _reader.ReadBytes(4);
+            return BitConverter.ToInt32(bytes, 0);
+        }
+
+        public void WriteLongLE(long value)
+        {
+            byte[] bytes = BitConverter.GetBytes(value);
+            _writer.Write(bytes);
+        }
+
+        public long ReadLongLE()
+        {
+            byte[] bytes = _reader.ReadBytes(8);
+            return BitConverter.ToInt64(bytes, 0);
+        }
+
+        public void WriteShortLE(short value)
+        {
+            byte[] bytes = BitConverter.GetBytes(value);
+            _writer.Write(bytes);
+        }
+
+        public short ReadShortLE()
+        {
+            byte[] bytes = _reader.ReadBytes(2);
+            return BitConverter.ToInt16(bytes, 0);
         }
     }
 }

@@ -10,7 +10,6 @@ namespace BedrockProtocol.Packets
     {
         public override uint PacketId => (uint)PacketIds.StartGame;
 
-        // --- Entity ---
         public long EntityUniqueId { get; set; }
         public ulong EntityRuntimeId { get; set; }
         public int PlayerGamemode { get; set; }
@@ -20,7 +19,6 @@ namespace BedrockProtocol.Packets
         public float Pitch { get; set; }
         public float Yaw { get; set; }
 
-        // --- Level Settings ---
         public long Seed { get; set; }
         public short SpawnBiomeType { get; set; } = 0;
         public string UserDefinedBiomeName { get; set; } = "plains";
@@ -33,9 +31,6 @@ namespace BedrockProtocol.Packets
         public int SpawnY { get; set; }
         public int SpawnZ { get; set; }
         public bool HasAchievementsDisabled { get; set; } = true;
-        public int EditorWorldType { get; set; } = 0;
-        public bool CreatedInEditor { get; set; }
-        public bool ExportedFromEditor { get; set; }
         public int DayCycleStopTime { get; set; } = -1;
         public int EduEditionOffer { get; set; } = 0;
         public bool HasEduFeaturesEnabled { get; set; } = false;
@@ -45,8 +40,8 @@ namespace BedrockProtocol.Packets
         public bool HasConfirmedPlatformLockedContent { get; set; } = false;
         public bool MultiplayerGame { get; set; } = true;
         public bool BroadcastToLan { get; set; } = true;
-        public int XblBroadcastIntent { get; set; } = 4;
-        public int PlatformBroadcastIntent { get; set; } = 4;
+        public int XblBroadcastIntent { get; set; } = 4; // Public
+        public int PlatformBroadcastIntent { get; set; } = 4; // Public
         public bool CommandsEnabled { get; set; }
         public bool IsTexturePacksRequired { get; set; } = false;
         public GameRules GameRules { get; set; } = GameRules.GetDefault();
@@ -63,9 +58,6 @@ namespace BedrockProtocol.Packets
         public bool IsFromWorldTemplate { get; set; } = false;
         public bool IsWorldTemplateOptionLocked { get; set; } = false;
         public bool IsOnlySpawningV1Villagers { get; set; } = false;
-        public bool IsDisablingPersonas { get; set; }
-        public bool IsDisablingCustomSkins { get; set; }
-        public bool MuteEmoteAnnouncements { get; set; }
         public string VanillaVersion { get; set; } = "*";
         public int LimitedWorldWidth { get; set; } = 16;
         public int LimitedWorldDepth { get; set; } = 16;
@@ -75,19 +67,17 @@ namespace BedrockProtocol.Packets
         public bool ForceExperimentalGameplay { get; set; } = false;
         public byte ChatRestrictionLevel { get; set; }
         public bool DisablePlayerInteractions { get; set; }
+        public bool IsDisablingPersonas { get; set; }
+        public bool IsDisablingCustomSkins { get; set; }
 
-        // --- Post Level Settings ---
         public string LevelId { get; set; } = "";
         public string WorldName { get; set; } = "World";
         public string PremiumWorldTemplateId { get; set; } = "";
         public bool IsTrial { get; set; } = false;
 
-        // --- Movement ---
-        public int AuthoritativeMovementMode { get; set; } = 0;
         public int RewindHistorySize { get; set; } = 0;
         public bool IsServerAuthoritativeBlockBreaking { get; set; }
 
-        // --- Misc ---
         public long CurrentTick { get; set; }
         public int EnchantmentSeed { get; set; }
         public List<CustomBlockDefinition> BlockProperties { get; } = new();
@@ -97,22 +87,25 @@ namespace BedrockProtocol.Packets
         public CompoundTag PlayerPropertyData { get; set; } = new CompoundTag();
         public long BlockRegistryChecksum { get; set; } = 0;
         public Guid WorldTemplateId { get; set; } = Guid.Empty;
+
         public bool ClientSideGenerationEnabled { get; set; }
         public bool BlockNetworkIdsHashed { get; set; }
         public bool IsSoundsServerAuthoritative { get; set; }
 
-        // --- Telemetry / server identity (written BEFORE ServerJoinInformation) ---
+        public int EditorWorldType { get; set; } = 0;
+        public bool CreatedInEditor { get; set; }
+        public bool ExportedFromEditor { get; set; }
+        public bool MuteEmoteAnnouncements { get; set; }
+
         public string ServerId { get; set; } = "";
         public string WorldId { get; set; } = "";
         public string ScenarioId { get; set; } = "";
         public string OwnerId { get; set; } = "";
 
-        // --- Server Join Info (written AFTER telemetry strings) ---
+        public bool TickDeathSystemsEnabled { get; set; } = false;
+
         public bool HasServerJoinInformation { get; set; } = false;
         public ServerJoinInfo? ServerJoinInfo { get; set; }
-
-        // --- Tick death systems ---
-        public bool TickDeathSystemsEnabled { get; set; } = false;
 
         public override void Decode(BinaryStream stream) { }
 
@@ -122,8 +115,8 @@ namespace BedrockProtocol.Packets
             stream.WriteActorRuntimeId(EntityRuntimeId);
             stream.WriteVarInt(PlayerGamemode);
             stream.WriteVector3(X, Y, Z);
-            stream.WriteFloat(Pitch);
             stream.WriteFloat(Yaw);
+            stream.WriteFloat(Pitch);
 
             WriteLevelSettings(stream);
 
@@ -132,8 +125,6 @@ namespace BedrockProtocol.Packets
             stream.WriteString(PremiumWorldTemplateId);
             stream.WriteBool(IsTrial);
 
-            // Movement authority block
-            stream.WriteVarInt(AuthoritativeMovementMode);
             stream.WriteVarInt(RewindHistorySize);
             stream.WriteBool(IsServerAuthoritativeBlockBreaking);
 
@@ -160,37 +151,37 @@ namespace BedrockProtocol.Packets
             stream.WriteBool(BlockNetworkIdsHashed);
             stream.WriteBool(IsSoundsServerAuthoritative);
 
-            // Telemetry strings come BEFORE ServerJoinInformation
-            stream.WriteString(ServerId);
-            stream.WriteString(WorldId);
-            stream.WriteString(ScenarioId);
-            stream.WriteString(OwnerId);
-
-            // Server join info (optional block)
             stream.WriteBool(HasServerJoinInformation);
             if (HasServerJoinInformation && ServerJoinInfo != null)
             {
                 stream.WriteBool(ServerJoinInfo.GatheringJoinInfo != null);
                 if (ServerJoinInfo.GatheringJoinInfo != null)
+                {
                     WriteGatheringJoinInfo(stream, ServerJoinInfo.GatheringJoinInfo);
-
+                }
                 stream.WriteBool(ServerJoinInfo.StoreEntryPointInfo != null);
                 if (ServerJoinInfo.StoreEntryPointInfo != null)
+                {
                     WriteStoreEntryPointInfo(stream, ServerJoinInfo.StoreEntryPointInfo);
-
+                }
                 stream.WriteBool(ServerJoinInfo.PresenceInfo != null);
                 if (ServerJoinInfo.PresenceInfo != null)
+                {
                     WritePresenceInfo(stream, ServerJoinInfo.PresenceInfo);
+                }
             }
 
-            // Tick death systems flag (tail field added in recent protocol versions)
+            stream.WriteString(ServerId ?? "");
+            stream.WriteString(WorldId ?? "");
+            stream.WriteString(ScenarioId ?? "");
+            stream.WriteString(OwnerId ?? "");
             stream.WriteBool(TickDeathSystemsEnabled);
         }
 
         private void WriteLevelSettings(BinaryStream stream)
         {
-            stream.WriteLong(Seed);
-            stream.WriteShort(SpawnBiomeType);
+            stream.WriteLongLE(Seed);
+            stream.WriteShortLE(SpawnBiomeType);
             stream.WriteString(UserDefinedBiomeName);
             stream.WriteVarInt(Dimension);
             stream.WriteVarInt(Generator);
@@ -224,7 +215,7 @@ namespace BedrockProtocol.Packets
             stream.WriteBool(BonusChest);
             stream.WriteBool(HasStartWithMapEnabled);
             stream.WriteVarInt(PermissionLevel);
-            stream.WriteInt(ServerChunkTickRange);
+            stream.WriteIntLE(ServerChunkTickRange);
             stream.WriteBool(HasLockedBehaviorPack);
             stream.WriteBool(HasLockedResourcePack);
             stream.WriteBool(IsFromLockedWorldTemplate);
@@ -235,13 +226,16 @@ namespace BedrockProtocol.Packets
             stream.WriteBool(IsDisablingPersonas);
             stream.WriteBool(IsDisablingCustomSkins);
             stream.WriteBool(MuteEmoteAnnouncements);
-            stream.WriteString(VanillaVersion);
-            stream.WriteInt(LimitedWorldWidth);
-            stream.WriteInt(LimitedWorldDepth);
+            stream.WriteString(ServerEngine);
+            stream.WriteIntLE(16);
+            stream.WriteIntLE(16);
             stream.WriteBool(NewNether);
+
             stream.WriteString(EduSharedResourceButtonName);
             stream.WriteString(EduSharedResourceLinkUri);
+
             stream.WriteBool(ForceExperimentalGameplay);
+
             stream.WriteByte(ChatRestrictionLevel);
             stream.WriteBool(DisablePlayerInteractions);
         }
