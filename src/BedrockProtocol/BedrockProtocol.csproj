@@ -4,11 +4,28 @@
     <TargetFramework>net9.0</TargetFramework>
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
+  
+  <PackageId>BedrockProtocol</PackageId>
+    <Version>1.0.1</Version>
+    <Authors>BedrockSharp</Authors>
+    <Company>BedrockSharp</Company>
+    <Description>A high-performance, modern .NET implementation of the Minecraft: Bedrock Edition protocol.</Description>
+    <PackageLicenseExpression>MIT</PackageLicenseExpression>
+    <PackageProjectUrl>https://github.com/BedrockSharp/bedrock-protocol</PackageProjectUrl>
+    <RepositoryUrl>https://github.com/BedrockSharp/bedrock-protocol</RepositoryUrl>
+    <RepositoryType>git</RepositoryType>
+    <PackageTags>protocol;mcpe;minecraft;bedrock</PackageTags>
+    <PackageReadmeFile>README.md</PackageReadmeFile>
   </PropertyGroup>
 
   <ItemGroup>
     <PackageReference Include="BedrockSharp.Nbt" Version="1.0.1" />
     <PackageReference Include="RaknetCS" Version="1.0.0" />
+  </ItemGroup>
+  
+  <ItemGroup>
+    <None Include="..\..\README.md" Pack="true" PackagePath="\" />
+    <None Include="..\..\LICENSE" Pack="true" PackagePath="\" />
   </ItemGroup>
 
 </Project>
