@@ -6,7 +6,7 @@
     <Nullable>enable</Nullable>
   
   <PackageId>BedrockProtocol</PackageId>
-    <Version>1.0.1</Version>
+    <Version>1.0.2</Version>
     <Authors>BedrockSharp</Authors>
     <Company>BedrockSharp</Company>
     <Description>A high-performance, modern .NET implementation of the Minecraft: Bedrock Edition protocol.</Description>
