@@ -35,6 +35,11 @@ namespace BedrockProtocol.Packets
         CreativeContent = 0x91,
         NetworkSettings = 0x8f,
         RequestNetworkSettings = 0xc1,
-        VoxelShapes = 0x151
+        VoxelShapes = 0x151,
+        RequestChunkRadius = 0x45,
+        ChunkRadiusUpdated = 0x46,
+        NetworkChunkPublisherUpdate = 0x79,
+        ResourcePackChunkData = 0x53,
+        ResourcePackChunkRequest = 0x54
     }
 }
