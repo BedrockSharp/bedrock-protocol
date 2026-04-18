@@ -1,3 +1,5 @@
+using BedrockProtocol.Utils;
+
 namespace BedrockProtocol.Packets.Types
 {
     public struct BlockPosition
