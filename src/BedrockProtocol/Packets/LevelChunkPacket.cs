@@ -8,28 +8,82 @@ namespace BedrockProtocol.Packets
 
         public int ChunkX { get; set; }
         public int ChunkZ { get; set; }
+        public int Dimension { get; set; }
         public int SubChunkCount { get; set; }
         public bool CacheEnabled { get; set; }
+        public bool RequestSubChunks { get; set; }
+        public int SubChunkLimit { get; set; }
+        public long[] BlobIds { get; set; } = new long[0];
         public byte[] Payload { get; set; } = new byte[0];
 
         public override void Encode(BinaryStream stream)
         {
             stream.WriteVarInt(ChunkX);
             stream.WriteVarInt(ChunkZ);
-            stream.WriteUnsignedVarInt((uint)SubChunkCount);
+            stream.WriteVarInt(Dimension);
+
+            if (!RequestSubChunks)
+            {
+                stream.WriteUnsignedVarInt((uint)SubChunkCount);
+            }
+            else if (SubChunkLimit < 0)
+            {
+                stream.WriteUnsignedVarInt(uint.MaxValue); // -1
+            }
+            else
+            {
+                stream.WriteUnsignedVarInt(uint.MaxValue - 1); // -2
+                stream.WriteUnsignedVarInt((uint)SubChunkLimit);
+            }
+
             stream.WriteBool(CacheEnabled);
-            stream.WriteUnsignedVarInt((uint)Payload.Length);
-            stream.WriteBytes(Payload);
+            if (CacheEnabled)
+            {
+                stream.WriteUnsignedVarInt((uint)BlobIds.Length);
+                foreach (long blobId in BlobIds)
+                {
+                    stream.WriteLongLE(blobId);
+                }
+            }
+
+            stream.WriteByteArray(Payload);
         }
 
         public override void Decode(BinaryStream stream)
         {
             ChunkX = stream.ReadVarInt();
             ChunkZ = stream.ReadVarInt();
-            SubChunkCount = (int)stream.ReadUnsignedVarInt();
+            Dimension = stream.ReadVarInt();
+
+            uint subChunkIndicator = stream.ReadUnsignedVarInt();
+            if (subChunkIndicator == uint.MaxValue) // -1
+            {
+                RequestSubChunks = true;
+                SubChunkLimit = -1;
+            }
+            else if (subChunkIndicator == uint.MaxValue - 1) // -2
+            {
+                RequestSubChunks = true;
+                SubChunkLimit = (int)stream.ReadUnsignedVarInt();
+            }
+            else
+            {
+                RequestSubChunks = false;
+                SubChunkCount = (int)subChunkIndicator;
+            }
+
             CacheEnabled = stream.ReadBool();
-            uint len = stream.ReadUnsignedVarInt();
-            Payload = stream.ReadBytes((int)len);
+            if (CacheEnabled)
+            {
+                uint count = stream.ReadUnsignedVarInt();
+                BlobIds = new long[count];
+                for (int i = 0; i < count; i++)
+                {
+                    BlobIds[i] = stream.ReadLongLE();
+                }
+            }
+
+            Payload = stream.ReadByteArray();
         }
     }
 }
