@@ -38,6 +38,8 @@ namespace BedrockProtocol.Packets
         VoxelShapes = 0x151,
         RequestChunkRadius = 0x45,
         ChunkRadiusUpdated = 0x46,
-        NetworkChunkPublisherUpdate = 0x79
+        NetworkChunkPublisherUpdate = 0x79,
+        ResourcePackChunkData = 0x53,
+        ResourcePackChunkRequest = 0x54
     }
 }
