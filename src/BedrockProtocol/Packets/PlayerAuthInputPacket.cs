@@ -1,4 +1,5 @@
 using BedrockProtocol.Utils;
+using System;
 
 namespace BedrockProtocol.Packets
 {
@@ -15,34 +16,20 @@ namespace BedrockProtocol.Packets
         public float MoveVectorZ { get; set; }
         public float HeadYaw { get; set; }
         public ulong InputFlags { get; set; }
-        public int InputMode { get; set; }
-        public int PlayMode { get; set; }
-        public int InteractionModel { get; set; }
-        public ulong GazeDirectionX { get; set; }
-        public ulong GazeDirectionY { get; set; }
-        public ulong GazeDirectionZ { get; set; }
+        public ulong InputFlags2 { get; set; }
+        public uint InputMode { get; set; }
+        public uint PlayMode { get; set; }
+        public uint InteractionModel { get; set; }
+        public float InteractRotationX { get; set; }
+        public float InteractRotationY { get; set; }
         public ulong Tick { get; set; }
-        public ulong Delta { get; set; }
+        public float DeltaX { get; set; }
+        public float DeltaY { get; set; }
+        public float DeltaZ { get; set; }
 
         public override void Encode(BinaryStream stream)
         {
-            stream.WriteFloat(Pitch);
-            stream.WriteFloat(Yaw);
-            stream.WriteFloat(PositionX);
-            stream.WriteFloat(PositionY);
-            stream.WriteFloat(PositionZ);
-            stream.WriteFloat(MoveVectorX);
-            stream.WriteFloat(MoveVectorZ);
-            stream.WriteFloat(HeadYaw);
-            stream.WriteUnsignedVarLong(InputFlags);
-            stream.WriteUnsignedVarInt((uint)InputMode);
-            stream.WriteUnsignedVarInt((uint)PlayMode);
-            stream.WriteVarInt(InteractionModel);
-            stream.WriteUnsignedVarLong(GazeDirectionX);
-            stream.WriteUnsignedVarLong(GazeDirectionY);
-            stream.WriteUnsignedVarLong(GazeDirectionZ);
-            stream.WriteUnsignedVarLong(Tick);
-            stream.WriteUnsignedVarLong(Delta);
+            throw new NotImplementedException();
         }
 
         public override void Decode(BinaryStream stream)
@@ -55,15 +42,24 @@ namespace BedrockProtocol.Packets
             MoveVectorX = stream.ReadFloat();
             MoveVectorZ = stream.ReadFloat();
             HeadYaw = stream.ReadFloat();
+            
             InputFlags = stream.ReadUnsignedVarLong();
-            InputMode = (int)stream.ReadUnsignedVarInt();
-            PlayMode = (int)stream.ReadUnsignedVarInt();
-            InteractionModel = stream.ReadVarInt();
-            GazeDirectionX = stream.ReadUnsignedVarLong();
-            GazeDirectionY = stream.ReadUnsignedVarLong();
-            GazeDirectionZ = stream.ReadUnsignedVarLong();
+            InputFlags2 = stream.ReadUnsignedVarLong();
+
+            InputMode = stream.ReadUnsignedVarInt();
+            PlayMode = stream.ReadUnsignedVarInt();
+            InteractionModel = stream.ReadUnsignedVarInt();
+            
+            InteractRotationX = stream.ReadFloat();
+            InteractRotationY = stream.ReadFloat();
+            
             Tick = stream.ReadUnsignedVarLong();
-            Delta = stream.ReadUnsignedVarLong();
+            
+            DeltaX = stream.ReadFloat();
+            DeltaY = stream.ReadFloat();
+            DeltaZ = stream.ReadFloat();
+            
+            // TODO: Implement remaining optional fields after this based on InputFlags (Item Interactions, Block Actions, etc.)
         }
     }
 }

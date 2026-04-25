@@ -11,7 +11,7 @@ namespace BedrockProtocol.Packets.Enums
         System = 6,
         Whisper = 7,
         Announcement = 8,
-        TextObjectMessage = 9,
-        ObjectMessage = 10
+        ObjectMessage = 9,
+        ObjectWhisperMessage = 10
     }
 }

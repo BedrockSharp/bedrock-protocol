@@ -40,6 +40,7 @@ namespace BedrockProtocol.Packets
         ChunkRadiusUpdated = 0x46,
         NetworkChunkPublisherUpdate = 0x79,
         ResourcePackChunkData = 0x53,
-        ResourcePackChunkRequest = 0x54
+        ResourcePackChunkRequest = 0x54,
+        Animate = 0x2c,
     }
 }
