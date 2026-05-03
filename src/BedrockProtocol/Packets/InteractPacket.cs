@@ -1,5 +1,6 @@
 using BedrockProtocol.Packets.Enums;
 using BedrockProtocol.Utils;
+using BedrockProtocol.Types;
 
 namespace BedrockProtocol.Packets
 {
@@ -9,9 +10,7 @@ namespace BedrockProtocol.Packets
 
         public InteractAction Action { get; set; }
         public ulong TargetRuntimeEntityId { get; set; }
-        public float X { get; set; }
-        public float Y { get; set; }
-        public float Z { get; set; }
+        public Vector3 Position { get; set; }
 
         public override void Encode(BinaryStream stream)
         {
@@ -19,9 +18,7 @@ namespace BedrockProtocol.Packets
             stream.WriteUnsignedVarLong(TargetRuntimeEntityId);
             if (Action == InteractAction.Hover || Action == InteractAction.Interact)
             {
-                stream.WriteFloat(X);
-                stream.WriteFloat(Y);
-                stream.WriteFloat(Z);
+                stream.WriteVector3(Position);
             }
         }
 
@@ -31,9 +28,7 @@ namespace BedrockProtocol.Packets
             TargetRuntimeEntityId = stream.ReadUnsignedVarLong();
             if (Action == InteractAction.Hover || Action == InteractAction.Interact)
             {
-                X = stream.ReadFloat();
-                Y = stream.ReadFloat();
-                Z = stream.ReadFloat();
+                Position = stream.ReadVector3();
             }
         }
     }

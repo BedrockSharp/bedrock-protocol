@@ -6,7 +6,7 @@ namespace BedrockProtocol.Packets
     {
         public override uint PacketId => (uint)PacketIds.SettingsCommand;
 
-        public string CommandLine { get; set; }
+        public string CommandLine { get; set; } = string.Empty;
         public bool SuppressOutput { get; set; }
 
         public override void Encode(BinaryStream stream)

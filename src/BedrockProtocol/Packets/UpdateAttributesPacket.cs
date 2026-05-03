@@ -1,4 +1,6 @@
+using BedrockProtocol.Packets.Types;
 using BedrockProtocol.Utils;
+using System.Collections.Generic;
 
 namespace BedrockProtocol.Packets
 {
@@ -6,21 +8,33 @@ namespace BedrockProtocol.Packets
     {
         public override uint PacketId => (uint)PacketIds.UpdateAttributes;
 
-        public ulong EntityId { get; set; }
-        public byte[] Payload { get; set; } = new byte[0];
+        public ulong EntityRuntimeId { get; set; }
+        public List<NetworkAttribute> Attributes { get; set; } = new List<NetworkAttribute>();
+        public ulong Tick { get; set; }
 
         public override void Encode(BinaryStream stream)
         {
-            stream.WriteUnsignedVarLong(EntityId);
-            stream.WriteUnsignedVarInt((uint)Payload.Length);
-            stream.WriteBytes(Payload);
+            stream.WriteUnsignedVarLong(EntityRuntimeId);
+            stream.WriteUnsignedVarInt((uint)Attributes.Count);
+            foreach (var attribute in Attributes)
+            {
+                attribute.Encode(stream);
+            }
+            stream.WriteUnsignedVarLong(Tick);
         }
 
         public override void Decode(BinaryStream stream)
         {
-            EntityId = stream.ReadUnsignedVarLong();
-            uint len = stream.ReadUnsignedVarInt();
-            Payload = stream.ReadBytes((int)len);
+            EntityRuntimeId = stream.ReadUnsignedVarLong();
+            uint count = stream.ReadUnsignedVarInt();
+            Attributes = new List<NetworkAttribute>((int)count);
+            for (int i = 0; i < count; i++)
+            {
+                var attr = new NetworkAttribute();
+                attr.Decode(stream);
+                Attributes.Add(attr);
+            }
+            Tick = stream.ReadUnsignedVarLong();
         }
     }
 }

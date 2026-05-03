@@ -7,10 +7,10 @@ namespace BedrockProtocol.Packets
     {
         public override uint PacketId => (uint)PacketIds.CommandRequest;
 
-        public string CommandLine { get; set; }
+        public string CommandLine { get; set; } = string.Empty;
         public CommandOrigin CommandOrigin { get; set; } = new CommandOrigin();
         public bool Internal { get; set; }
-        public string Version { get; set; }
+        public string Version { get; set; } = string.Empty;
 
         public override void Encode(BinaryStream stream)
         {

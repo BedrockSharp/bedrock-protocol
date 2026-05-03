@@ -1,5 +1,6 @@
 using BedrockProtocol.Utils;
 using BedrockProtocol.Packets.Types;
+using BedrockProtocol.Types;
 using Nbt;
 using System;
 using System.Collections.Generic;
@@ -13,9 +14,7 @@ namespace BedrockProtocol.Packets
         public long EntityUniqueId { get; set; }
         public ulong EntityRuntimeId { get; set; }
         public int PlayerGamemode { get; set; }
-        public float X { get; set; }
-        public float Y { get; set; }
-        public float Z { get; set; }
+        public Vector3 Position { get; set; }
         public float Pitch { get; set; }
         public float Yaw { get; set; }
 
@@ -27,9 +26,7 @@ namespace BedrockProtocol.Packets
         public int WorldGamemode { get; set; }
         public bool IsHardcore { get; set; } = false;
         public int Difficulty { get; set; }
-        public int SpawnX { get; set; }
-        public int SpawnY { get; set; }
-        public int SpawnZ { get; set; }
+        public BlockPosition SpawnPosition { get; set; }
         public bool HasAchievementsDisabled { get; set; } = true;
         public int DayCycleStopTime { get; set; } = -1;
         public int EduEditionOffer { get; set; } = 0;
@@ -114,7 +111,7 @@ namespace BedrockProtocol.Packets
             stream.WriteActorUniqueId(EntityUniqueId);
             stream.WriteActorRuntimeId(EntityRuntimeId);
             stream.WriteVarInt(PlayerGamemode);
-            stream.WriteVector3(X, Y, Z);
+            stream.WriteVector3(Position);
             stream.WriteFloat(Yaw);
             stream.WriteFloat(Pitch);
 
@@ -188,7 +185,7 @@ namespace BedrockProtocol.Packets
             stream.WriteVarInt(WorldGamemode);
             stream.WriteBool(IsHardcore);
             stream.WriteVarInt(Difficulty);
-            stream.WriteBlockVector3(SpawnX, SpawnY, SpawnZ);
+            stream.WriteBlockPosition(SpawnPosition);
             stream.WriteBool(HasAchievementsDisabled);
             stream.WriteVarInt(EditorWorldType);
             stream.WriteBool(CreatedInEditor);

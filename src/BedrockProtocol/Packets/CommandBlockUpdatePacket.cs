@@ -17,10 +17,10 @@ namespace BedrockProtocol.Packets
 
         public ulong MinecartEntityRuntimeId { get; set; }
 
-        public string Command { get; set; }
-        public string LastOutput { get; set; }
-        public string Name { get; set; }
-        public string FilteredName { get; set; }
+        public string Command { get; set; } = string.Empty;
+        public string LastOutput { get; set; } = string.Empty;
+        public string Name { get; set; } = string.Empty;
+        public string FilteredName { get; set; } = string.Empty;
         public bool ShouldTrackOutput { get; set; }
         public uint TickDelay { get; set; }
         public bool ExecuteOnFirstTick { get; set; }

@@ -1,4 +1,5 @@
 using BedrockProtocol.Utils;
+using BedrockProtocol.Types;
 
 namespace BedrockProtocol.Packets
 {
@@ -11,12 +12,8 @@ namespace BedrockProtocol.Packets
         public ulong EntityId { get; set; }
         public ulong RuntimeEntityId { get; set; }
         public string PlatformChatId { get; set; } = string.Empty;
-        public float X { get; set; }
-        public float Y { get; set; }
-        public float Z { get; set; }
-        public float VelocityX { get; set; }
-        public float VelocityY { get; set; }
-        public float VelocityZ { get; set; }
+        public Vector3 Position { get; set; }
+        public Vector3 Velocity { get; set; }
         public float Pitch { get; set; }
         public float HeadYaw { get; set; }
         public float Yaw { get; set; }
@@ -30,12 +27,8 @@ namespace BedrockProtocol.Packets
             stream.WriteUnsignedVarLong(EntityId);
             stream.WriteUnsignedVarLong(RuntimeEntityId);
             stream.WriteString(PlatformChatId);
-            stream.WriteFloat(X);
-            stream.WriteFloat(Y);
-            stream.WriteFloat(Z);
-            stream.WriteFloat(VelocityX);
-            stream.WriteFloat(VelocityY);
-            stream.WriteFloat(VelocityZ);
+            stream.WriteVector3(Position);
+            stream.WriteVector3(Velocity);
             stream.WriteFloat(Pitch);
             stream.WriteFloat(HeadYaw);
             stream.WriteFloat(Yaw);
@@ -50,12 +43,8 @@ namespace BedrockProtocol.Packets
             EntityId = stream.ReadUnsignedVarLong();
             RuntimeEntityId = stream.ReadUnsignedVarLong();
             PlatformChatId = stream.ReadString();
-            X = stream.ReadFloat();
-            Y = stream.ReadFloat();
-            Z = stream.ReadFloat();
-            VelocityX = stream.ReadFloat();
-            VelocityY = stream.ReadFloat();
-            VelocityZ = stream.ReadFloat();
+            Position = stream.ReadVector3();
+            Velocity = stream.ReadVector3();
             Pitch = stream.ReadFloat();
             HeadYaw = stream.ReadFloat();
             Yaw = stream.ReadFloat();

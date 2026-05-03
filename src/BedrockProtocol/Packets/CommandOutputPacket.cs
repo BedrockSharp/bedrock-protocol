@@ -14,7 +14,7 @@ namespace BedrockProtocol.Packets
         public CommandOutputType OutputType { get; set; }
         public uint SuccessCount { get; set; }
         public List<CommandOutputMessage> OutputMessages { get; set; } = new List<CommandOutputMessage>();
-        public string DataSet { get; set; }
+        public string? DataSet { get; set; } = null;
 
         public override void Encode(BinaryStream stream)
         {

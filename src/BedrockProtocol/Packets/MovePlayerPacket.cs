@@ -1,5 +1,6 @@
 using BedrockProtocol.Packets.Enums;
 using BedrockProtocol.Utils;
+using BedrockProtocol.Types;
 
 namespace BedrockProtocol.Packets
 {
@@ -8,9 +9,7 @@ namespace BedrockProtocol.Packets
         public override uint PacketId => (uint)PacketIds.MovePlayer;
 
         public ulong RuntimeEntityId { get; set; }
-        public float X { get; set; }
-        public float Y { get; set; }
-        public float Z { get; set; }
+        public Vector3 Position { get; set; }
 
         public float Pitch { get; set; }
         public float Yaw { get; set; }
@@ -29,9 +28,7 @@ namespace BedrockProtocol.Packets
         {
             stream.WriteUnsignedVarLong(RuntimeEntityId);
 
-            stream.WriteFloat(X);
-            stream.WriteFloat(Y);
-            stream.WriteFloat(Z);
+            stream.WriteVector3(Position);
 
             stream.WriteFloat(Pitch);
             stream.WriteFloat(Yaw);
@@ -54,9 +51,7 @@ namespace BedrockProtocol.Packets
         {
             RuntimeEntityId = stream.ReadUnsignedVarLong();
 
-            X = stream.ReadFloat();
-            Y = stream.ReadFloat();
-            Z = stream.ReadFloat();
+            Position = stream.ReadVector3();
 
             Pitch = stream.ReadFloat();
             Yaw = stream.ReadFloat();

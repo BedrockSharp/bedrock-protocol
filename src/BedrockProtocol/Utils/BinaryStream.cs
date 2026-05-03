@@ -85,6 +85,9 @@ namespace BedrockProtocol.Utils
         public float ReadFloat() => _reader.ReadSingle();
         public void WriteFloat(float value) => _writer.Write(value);
 
+        public double ReadDouble() => _reader.ReadDouble();
+        public void WriteDouble(double value) => _writer.Write(value);
+
         public bool ReadBool() => _reader.ReadBoolean();
         public void WriteBool(bool value) => _writer.Write(value);
 
@@ -136,7 +139,7 @@ namespace BedrockProtocol.Utils
             }
         }
 
-        public void WriteOptional<T>(T value, Action<BinaryStream, T> writer) where T : class {
+        public void WriteOptional<T>(T? value, Action<BinaryStream, T> writer) where T : class {
             WriteBool(value != null);
             if(value != null) {
                 writer(this, value);
@@ -155,6 +158,7 @@ namespace BedrockProtocol.Utils
             return reader(this);
         }
 
+
         public T? ReadOptional<T>() where T : class, new() {
             bool exists = ReadBool();
             if(!exists) return null;
@@ -169,17 +173,30 @@ namespace BedrockProtocol.Utils
         public ulong ReadActorRuntimeId() => ReadUnsignedVarLong();
         public void WriteActorRuntimeId(ulong value) => WriteUnsignedVarLong(value);
 
-        public byte[] ReadByteArray()
+        public byte[] ReadByteSlice()
         {
             uint length = ReadUnsignedVarInt();
             return ReadBytes((int)length);
         }
 
-        public void WriteByteArray(byte[] data)
+        public void WriteByteSlice(byte[] data)
         {
             WriteUnsignedVarInt((uint)data.Length);
             WriteBytes(data);
         }
+
+        public float ReadByteRotation()
+        {
+            return (float)ReadByte() * (360.0f / 256.0f);
+        }
+
+        public void WriteByteRotation(float degrees)
+        {
+            WriteByte((byte)(degrees * (256.0f / 360.0f)));
+        }
+
+        public byte[] ReadByteArray() => ReadByteSlice();
+        public void WriteByteArray(byte[] data) => WriteByteSlice(data);
 
         public void WriteVector3(float x, float y, float z)
         {
@@ -187,6 +204,31 @@ namespace BedrockProtocol.Utils
             WriteFloat(y);
             WriteFloat(z);
         }
+
+        public void WriteVector3(Vector3 vector)
+        {
+            WriteFloat(vector.X);
+            WriteFloat(vector.Y);
+            WriteFloat(vector.Z);
+        }
+
+        public Vector3 ReadVector3()
+        {
+            return new Vector3(ReadFloat(), ReadFloat(), ReadFloat());
+        }
+
+        public void WriteVector2(Vector2 vector)
+        {
+            WriteFloat(vector.X);
+            WriteFloat(vector.Y);
+        }
+
+        public Vector2 ReadVector2()
+        {
+            return new Vector2(ReadFloat(), ReadFloat());
+        }
+
+
 
         public void WriteBlockVector3(int x, int y, int z)
         {
@@ -205,6 +247,66 @@ namespace BedrockProtocol.Utils
         {
             var nbtWriter = new NbtBinaryWriter(_memoryStream, false);
             tag.WriteNetwork(nbtWriter);
+        }
+
+        public CompoundTag ReadNetworkNbt()
+        {
+            long startPos = _memoryStream.Position;
+
+            byte tagByte = (byte)_memoryStream.ReadByte();
+
+            int payloadLength = (int)(_memoryStream.Length - _memoryStream.Position);
+            var payload = new byte[payloadLength];
+            _memoryStream.Read(payload, 0, payloadLength);
+
+            var buf = new byte[1 + 2 + payloadLength];
+            buf[0] = tagByte;
+            buf[1] = 0;
+            buf[2] = 0;
+            Buffer.BlockCopy(payload, 0, buf, 3, payloadLength);
+
+            var nbtFile = new NbtFile { BigEndian = false, UseVarInt = false, BufferSize = 0 };
+            using (var ms = new MemoryStream(buf))
+            {
+                nbtFile.LoadFromStream(ms, NbtCompression.None);
+                _memoryStream.Position = startPos + (ms.Position - 2);
+            }
+
+            return nbtFile.RootTag;
+        }
+
+        public void WriteNbt(byte[] data)
+        {
+            WriteUnsignedVarInt((uint)data.Length);
+            WriteBytes(data);
+        }
+
+        public byte[] ReadNbt()
+        {
+            uint length = ReadUnsignedVarInt();
+            return ReadBytes((int)length);
+        }
+
+        public BlockPosition ReadBlockPosition()
+        {
+            return BlockPosition.Decode(this);
+        }
+
+        public void WriteBlockPosition(BlockPosition position)
+        {
+            position.Encode(this);
+        }
+
+        public ItemInstance ReadItemInstance()
+        {
+            var instance = new ItemInstance();
+            instance.Decode(this);
+            return instance;
+        }
+
+        public void WriteItemInstance(ItemInstance instance)
+        {
+            instance.Encode(this);
         }
 
         public void WriteExperiments(List<ExperimentEntry> experiments)
@@ -271,6 +373,28 @@ namespace BedrockProtocol.Utils
         {
             byte[] bytes = _reader.ReadBytes(2);
             return BitConverter.ToInt16(bytes, 0);
+        }
+
+        public ushort ReadUnsignedShortLE()
+        {
+            byte[] bytes = _reader.ReadBytes(2);
+            return BitConverter.ToUInt16(bytes, 0);
+        }
+
+        public void WriteUnsignedShortLE(ushort value)
+        {
+            byte[] bytes = BitConverter.GetBytes(value);
+            _writer.Write(bytes);
+        }
+
+        public byte[] ReadRemainingBytes()
+        {
+            return _reader.ReadBytes((int)(_memoryStream.Length - _memoryStream.Position));
+        }
+
+        public void WriteRemainingBytes(byte[] data)
+        {
+            _writer.Write(data);
         }
     }
 }

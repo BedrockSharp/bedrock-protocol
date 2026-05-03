@@ -1,5 +1,6 @@
 using BedrockProtocol.Packets.Enums;
 using BedrockProtocol.Utils;
+using BedrockProtocol.Types;
 
 namespace BedrockProtocol.Packets
 {
@@ -8,9 +9,7 @@ namespace BedrockProtocol.Packets
         public override uint PacketId => (uint)PacketIds.LevelSoundEvent;
 
         public SoundEvent Sound { get; set; }
-        public float X { get; set; }
-        public float Y { get; set; }
-        public float Z { get; set; }
+        public Vector3 Position { get; set; }
         public int ExtraData { get; set; }
         public string EntityType { get; set; } = string.Empty;
         public bool IsBabyMob { get; set; }
@@ -19,9 +18,7 @@ namespace BedrockProtocol.Packets
         public override void Encode(BinaryStream stream)
         {
             stream.WriteUnsignedVarInt((uint)Sound);
-            stream.WriteFloat(X);
-            stream.WriteFloat(Y);
-            stream.WriteFloat(Z);
+            stream.WriteVector3(Position);
             stream.WriteVarInt(ExtraData);
             stream.WriteString(EntityType);
             stream.WriteBool(IsBabyMob);
@@ -31,9 +28,7 @@ namespace BedrockProtocol.Packets
         public override void Decode(BinaryStream stream)
         {
             Sound = (SoundEvent)stream.ReadUnsignedVarInt();
-            X = stream.ReadFloat();
-            Y = stream.ReadFloat();
-            Z = stream.ReadFloat();
+            Position = stream.ReadVector3();
             ExtraData = stream.ReadVarInt();
             EntityType = stream.ReadString();
             IsBabyMob = stream.ReadBool();

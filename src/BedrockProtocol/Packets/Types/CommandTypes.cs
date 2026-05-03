@@ -9,7 +9,7 @@ namespace BedrockProtocol.Packets.Types
     {
         public CommandOriginType Origin { get; set; }
         public Guid Uuid { get; set; }
-        public string RequestId { get; set; }
+        public string RequestId { get; set; } = string.Empty;
         public long PlayerUniqueId { get; set; }
 
         public void Encode(BinaryStream stream)
@@ -88,7 +88,7 @@ namespace BedrockProtocol.Packets.Types
     public class CommandOutputMessage
     {
         public bool Success { get; set; }
-        public string Message { get; set; }
+        public string Message { get; set; } = string.Empty;
         public List<string> Parameters { get; set; } = new List<string>();
 
         public void Encode(BinaryStream stream)
@@ -108,8 +108,8 @@ namespace BedrockProtocol.Packets.Types
 
     public class Command
     {
-        public string Name { get; set; }
-        public string Description { get; set; }
+        public string Name { get; set; } = string.Empty;
+        public string Description { get; set; } = string.Empty;
         public ushort Flags { get; set; }
         public CommandPermissionLevel PermissionLevel { get; set; }
         public uint AliasesOffset { get; set; }
@@ -170,7 +170,7 @@ namespace BedrockProtocol.Packets.Types
 
     public class CommandParameter
     {
-        public string Name { get; set; }
+        public string Name { get; set; } = string.Empty;
         public uint Type { get; set; }
         public bool Optional { get; set; }
         public byte Options { get; set; }
@@ -194,7 +194,7 @@ namespace BedrockProtocol.Packets.Types
 
     public class CommandEnum
     {
-        public string Type { get; set; }
+        public string Type { get; set; } = string.Empty;
         public List<uint> ValueIndices { get; set; } = new List<uint>();
 
         public void Encode(BinaryStream stream)
@@ -212,7 +212,7 @@ namespace BedrockProtocol.Packets.Types
 
     public class ChainedSubcommand
     {
-        public string Name { get; set; }
+        public string Name { get; set; } = string.Empty;
         public List<ChainedSubcommandValue> Values { get; set; } = new List<ChainedSubcommandValue>();
 
         public void Encode(BinaryStream stream)
@@ -253,7 +253,7 @@ namespace BedrockProtocol.Packets.Types
 
     public class DynamicEnum
     {
-        public string Type { get; set; }
+        public string Type { get; set; } = string.Empty;
         public List<string> Values { get; set; } = new List<string>();
 
         public void Encode(BinaryStream stream)
@@ -273,7 +273,7 @@ namespace BedrockProtocol.Packets.Types
     {
         public uint EnumValueIndex { get; set; }
         public uint EnumIndex { get; set; }
-        public byte[] Constraints { get; set; }
+        public byte[] Constraints { get; set; } = Array.Empty<byte>();
 
         public void Encode(BinaryStream stream)
         {
